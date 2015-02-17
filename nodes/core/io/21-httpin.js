@@ -29,13 +29,13 @@ module.exports = function(RED) {
     var onHeaders = require('on-headers');
 
     function rawBodyParser(req, res, next) {
-        if (req._body) { return next(); }
+        //if (req._body) { return next(); }
         req.body = "";
         req._body = true;
         getBody(req, {
             limit: '1mb',
             length: req.headers['content-length'],
-            encoding: 'utf8'
+            encoding: 'sjis' //'utf8'
         }, function (err, buf) {
             if (err) { return next(err); }
             req.body = buf;
@@ -74,7 +74,7 @@ module.exports = function(RED) {
                 corsHandler = cors(RED.settings.httpNodeCors);
                 RED.httpNode.options(this.url,corsHandler);
             }
-            
+
             var metricsHandler = function(req,res,next) { next(); }
 
             if (this.metric()) {
@@ -94,7 +94,7 @@ module.exports = function(RED) {
                     next();
                 };
             }
-            
+
             if (this.method == "get") {
                 RED.httpNode.get(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
@@ -155,7 +155,7 @@ module.exports = function(RED) {
                         }
                         msg.res.set('content-length', len);
                     }
-                    
+
                     msg.res._msgId = msg._id;
                     msg.res.send(statusCode,msg.payload);
                 }
