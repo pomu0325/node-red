@@ -29,13 +29,13 @@ module.exports = function(RED) {
     var onHeaders = require('on-headers');
 
     function rawBodyParser(req, res, next) {
-        //if (req._body) { return next(); }
+        if (req._body) { return next(); }
         req.body = "";
         req._body = true;
         getBody(req, {
             limit: '1mb',
             length: req.headers['content-length'],
-            encoding: 'sjis' //'utf8'
+            encoding: 'utf8'
         }, function (err, buf) {
             if (err) { return next(err); }
             req.body = buf;
@@ -43,6 +43,18 @@ module.exports = function(RED) {
         });
     }
 
+    function sjisBodyParser(req, res, next) {
+        // TODO filter
+        req._body = true;
+        getBody(req, {
+            limit: '1mb',
+            length: req.headers['content-length']
+        }, function (err, buf) {
+            req.body = buf;
+            // TODO parse
+            next();
+        });
+    }
 
     function HTTPIn(n) {
         RED.nodes.createNode(this,n);
@@ -98,7 +110,7 @@ module.exports = function(RED) {
             if (this.method == "get") {
                 RED.httpNode.get(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,corsHandler,metricsHandler,sjisBodyParser,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
