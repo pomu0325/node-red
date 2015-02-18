@@ -45,13 +45,18 @@ module.exports = function(RED) {
 
     function sjisBodyParser(req, res, next) {
         // TODO filter
+        req.body = "";
         req._body = true;
         getBody(req, {
             limit: '1mb',
-            length: req.headers['content-length']
+            length: req.headers['content-length'],
+            encoding: 'shiftjis'
         }, function (err, buf) {
+            // convert Buffer from sjis to utf8
+            //var iconv = require("iconv-lite");
+            //var body = iconv.decode(buf, 'Shift_JIS');
             req.body = buf;
-            // TODO parse
+
             next();
         });
     }
